@@ -1,58 +1,73 @@
 #include "bullet.h"
 #include "enemy.h"
-#include "mainwindow.h"
-#include <QPainter>
-#include <QPropertyAnimation>
+#include "game.h"
+extern Game * game;
 
-const QSize Bullet::ms_fixedSize(8, 8);
-
-Bullet::Bullet(QPoint startPos, QPoint targetPoint, int damage, Enemy *target,
-			   MainWindow *game, const QPixmap &sprite/* = QPixmap(":/image/bullet.png")*/)
-	: m_startPos(startPos)
-	, m_targetPos(targetPoint)
-	, m_sprite(sprite)
-	, m_currentPos(startPos)
-	, m_target(target)
-	, m_game(game)
-	, m_damage(damage)
+Bullet::Bullet(Qt::GlobalColor color, Enemy *e, unsigned int damage_)
+    : aim(e), damage(damage_)
 {
+    setRect(0, 0, 10, 10);
+
+    QBrush brush(color, Qt::SolidPattern);
+    setBrush(brush);
+
+    QPen pen(color);
+    setPen(pen);
+
+    connect(timerForCheckingAim, SIGNAL(timeout()), this, SLOT(checkExistenceOfAim()));
+    timerForCheckingAim->start(50);
 }
 
-void Bullet::draw(QPainter *painter) const
+void Bullet::checkExistenceOfAim()
 {
-	painter->drawPixmap(m_currentPos, m_sprite);
+    if (aim->getCount()!=0)
+    {
+    if (aim->scene())
+    {
+        moveBulletTowardsAim();
+    }
+    else
+    {
+        timerForCheckingAim->stop();
+        delete this;
+    }
+    }
+    else
+        delete this;
 }
 
-void Bullet::move()
+void Bullet::moveBulletTowardsAim()
 {
-	// 100毫秒内击中敌人
-	static const int duration = 100;
-	QPropertyAnimation *animation = new QPropertyAnimation(this, "m_currentPos");
-	animation->setDuration(duration);
-	animation->setStartValue(m_startPos);
-	animation->setEndValue(m_targetPos);
-	connect(animation, SIGNAL(finished()), this, SLOT(hitTarget()));
+    rotateToAim();
 
-	animation->start();
+    double theta = rotation();
+
+    double dx = LENGTH_OF_MOVEMENT * qCos(qDegreesToRadians(theta));
+    double dy = LENGTH_OF_MOVEMENT * qSin(qDegreesToRadians(theta));
+
+    setPos(x()+dx, y()+dy);
+
+    checkIfBulletIsCloseEnoughAim();
 }
 
-void Bullet::hitTarget()
+void Bullet::rotateToAim()
 {
-	// 这样处理的原因是:
-	// 可能多个炮弹击中敌人,而其中一个将其消灭,导致敌人delete
-	// 后续炮弹再攻击到的敌人就是无效内存区域
-	// 因此先判断下敌人是否还有效
-         if (m_game->enemyList().indexOf(m_target) != -1)
-		m_target->getDamage(m_damage);
-         m_game->removedBullet(this);
+    updateLine();
+    setRotation(-1 * lineFromBulletToAim.angle());
 }
 
-void Bullet::setCurrentPos(QPoint pos)
+void Bullet::updateLine()
 {
-	m_currentPos = pos;
+    lineFromBulletToAim = QLineF(pos(), QPointF(aim->pos().x() + 20/2, aim->pos().y() + 20/2));
 }
 
-QPoint Bullet::currentPos() const
+void Bullet::checkIfBulletIsCloseEnoughAim()
 {
-	return m_currentPos;
+    if (lineFromBulletToAim.length() < LENGTH_OF_MOVEMENT)
+    {
+        aim->reduceHP(damage);
+        timerForCheckingAim->stop();
+        delete this;
+    }
 }
+

@@ -1,42 +1,36 @@
 #ifndef BULLET_H
 #define BULLET_H
 
-#include <QPoint>
-#include <QSize>
-#include <QPixmap>
 #include <QObject>
+#include <QGraphicsEllipseItem>
+#include <QBrush>
+#include <QPen>
+#include <QTimer>
 
-class QPainter;
-class Enemy;
-class MainWindow;
+#include "enemy.h"
 
-class Bullet : QObject
+class Bullet : public QObject, public QGraphicsEllipseItem
 {
-	Q_OBJECT
-	Q_PROPERTY(QPoint m_currentPos READ currentPos WRITE setCurrentPos)
-
-public:
-	Bullet(QPoint startPos, QPoint targetPoint, int damage, Enemy *target,
-		   MainWindow *game, const QPixmap &sprite = QPixmap(":/image/bullet.png"));
-
-         void draw(QPainter *painter) const;
-         void move();
-         void setCurrentPos(QPoint pos);
-         QPoint currentPos() const;
-
-private slots:
-	void hitTarget();
+    Q_OBJECT
 
 private:
-	const QPoint	m_startPos;
-	const QPoint	m_targetPos;
-	const QPixmap	m_sprite;
-	QPoint			m_currentPos;
-	Enemy *			m_target;
-	MainWindow *	m_game;
-	int				m_damage;
+    const int LENGTH_OF_MOVEMENT = 15;
 
-	static const QSize ms_fixedSize;
+    Enemy * aim;
+    QLineF lineFromBulletToAim;
+    QTimer * timerForCheckingAim = new QTimer(this);
+    unsigned int damage;
+
+    void moveBulletTowardsAim();
+    void rotateToAim();
+    void updateLine();
+    void checkIfBulletIsCloseEnoughAim();
+
+private slots:
+    void checkExistenceOfAim();
+
+public:
+    Bullet(Qt::GlobalColor color, Enemy *e, unsigned int damage_);
 };
 
 #endif // BULLET_H

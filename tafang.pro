@@ -1,8 +1,7 @@
-QT       += core gui
+QT -= gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-CONFIG += c++11
+CONFIG += c++11 console
+CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -16,15 +15,56 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    blockmap.cpp \
-    main.cpp \
-    widget.cpp
-
-HEADERS += \
-    blockmap.h \
-    widget.h
+        bluebullet.cpp \
+        bluetower.cpp \
+        bolck.cpp \
+        bullet.cpp \
+        enemy.cpp \
+        game.cpp \
+        hpbarenemyfill.cpp \
+        hpbarenemyframe.cpp \
+        interface.cpp \
+        interfaceonbuttom.cpp \
+        interfaceonrightside.cpp \
+        main.cpp \
+        map.cpp \
+        newlevelenemies.cpp \
+        palyer.cpp \
+        pathforenemy.cpp \
+        start.cpp \
+        tower.cpp \
+        towerrangeattack.cpp \
+        widgettowerdetails.cpp \
+        widgettoweroptions.cpp \
+        widgetwaitforclickblock.cpp \
+        widgetwithtoweroptions.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    bluebullet.h \
+    bluetower.h \
+    bolck.h \
+    bullet.h \
+    enemy.h \
+    game.h \
+    hpbarenemyfill.h \
+    hpbarenemyframe.h \
+    interface.h \
+    interfaceonbuttom.h \
+    interfaceonrightside.h \
+    map.h \
+    newlevelenemies.h \
+    palyer.h \
+    pathforenemy.h \
+    start.h \
+    tower.h \
+    towerrangeattack.h \
+    towers_prices.h \
+    widgettowerdetails.h \
+    widgettoweroptions.h \
+    widgetwaitforclickblock.h \
+    widgetwithtoweroptions.h
